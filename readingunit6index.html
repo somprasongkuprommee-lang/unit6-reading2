@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M.6 Unit 6 Quiz: Art, Media, and Meaning</title>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; background-color: #f0f2f5; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #2c3e50; }
+        .info-section { background: #e9ecef; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .passage { background: #fff3cd; padding: 15px; border-left: 5px solid #ffc107; margin-bottom: 25px; font-style: italic; }
+        .question-block { margin-bottom: 25px; padding: 15px; border-bottom: 1px solid #eee; }
+        .options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .option { padding: 10px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .option:hover { background: #e7f3ff; }
+        input[type="radio"] { margin-right: 10px; }
+        .submit-btn { display: block; width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+        #result { margin-top: 20px; display: none; padding: 20px; border-radius: 10px; background: #d4edda; border: 1px solid #c3e6cb; }
+        .explanation { font-size: 0.9em; color: #666; margin-top: 5px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎨 Art, Media, and Meaning Quiz</h1>
+    
+    <div class="info-section">
+        <input type="text" id="userName" placeholder="ชื่อ-นามสกุล" required>
+        <input type="number" id="userNo" placeholder="เลขที่" required>
+        <p style="font-size: 0.8em; color: red;">*เล่นได้เพียงครั้งเดียวเท่านั้น</p>
+    </div>
+
+    <div class="passage">
+        <strong>Read the text to find answers:</strong><br>
+        "In today’s world, art appears in many forms, from classic paintings to modern films and digital works. Some artworks are widely admired, while others are controversial... Many artists focus on visual elements such as color, light, and shape. Some prefer abstract styles... while others create commercial art... A talented novelist may write a powerful script... Whether praised or criticized, art continues to shape society..."
+    </div>
+
+    <form id="quizForm">
+        <div id="questionsContainer"></div>
+        <button type="button" id="submitBtn" class="submit-btn" onclick="calculateScore()">ส่งคำตอบและสรุปคะแนน</button>
+    </form>
+
+    <div id="result">
+        <h2>สรุปผลคะแนน</h2>
+        <p id="scoreDisplay"></p>
+        <div id="review"></div>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        { q: "According to the text, where does art appear today?", a: ["Only in museums", "Only in digital forms", "In many forms from paintings to films", "Only in classic styles"], c: 2, e: "เนื้อหาระบุว่า art appears in many forms, from classic paintings to modern films..." },
+        { q: "What causes debate among audiences and critics?", a: ["Modern films", "Controversial artworks", "Digital works", "Classic paintings"], c: 1, e: "เนื้อหาระบุว่า artworks that are 'controversial' create debate." },
+        { q: "How do discussions about art spread quickly?", a: ["Through books", "Through the media", "Through word of mouth", "Through schools"], c: 1, e: "เนื้อหาระบุว่า 'Through the media, these discussions spread quickly'." },
+        { q: "What can leave a striking impression on viewers?", a: ["A blank canvas", "A commercial ad", "A dramatic scene in a movie", "A technical manual"], c: 2, e: "เนื้อหาระบุว่า 'a dramatic scene in a movie can leave a striking impression'." },
+        { q: "What visual elements do many artists focus on?", a: ["Color, light, and shape", "Sound and movement", "Price and profit", "History and facts"], c: 0, e: "เนื้อหาระบุถึง 'visual elements such as color, light, and shape'." },
+        { q: "Which style expresses emotions rather than reality?", a: ["Commercial art", "Abstract styles", "Classic paintings", "Digital works"], c: 1, e: "เนื้อหาระบุว่า 'abstract styles that express emotions rather than reality'." },
+        { q: "What is the main purpose of commercial art?", a: ["To express emotions", "For profit", "To show real-life issues", "To capture a single moment"], c: 1, e: "เนื้อหาระบุว่า commercial art is 'designed mainly for profit'." },
+        { q: "What plays an important role in storytelling in films?", a: ["Budget", "Strong dialogue", "Visual elements", "The novelist"], c: 1, e: "เนื้อหาระบุว่า 'strong dialogue plays an important role in storytelling'." },
+        { q: "Who might write a powerful script?", a: ["A critic", "An audience member", "A talented novelist", "A painter"], c: 2, e: "เนื้อหาระบุว่า 'A talented novelist may write a powerful script'." },
+        { q: "What is personal observation turned into in a script?", a: ["A digital work", "An engaging story", "A controversial debate", "A visual element"], c: 1, e: "เนื้อหาระบุว่า 'turns personal observation into an engaging story'." },
+        { q: "When do audiences wait eagerly to see the story?", a: ["When the script is written", "When the movie is ready for release", "When the movie is criticized", "When the movie is finished filming"], c: 1, e: "เนื้อหาระบุว่า 'When a movie is ready for release, audiences often wait eagerly'." },
+        { q: "Why do some viewers criticize films?", a: ["For being too long", "For being too violent", "For being too abstract", "For being too commercial"], c: 1, e: "เนื้อหาระบุว่า 'Some viewers criticize films for being too violent'." },
+        { q: "Why do some viewers praise films?", a: ["For being digital", "For having no dialogue", "For showing real-life issues honestly", "For being classic"], c: 2, e: "เนื้อหาระบุว่า 'praise them for showing real-life issues honestly'." },
+        { q: "What continues to shape society?", a: ["Only films", "Only critics", "Art", "Profit"], c: 2, e: "เนื้อหาระบุว่า 'art continues to shape society'." },
+        { q: "What does art reflect according to the text?", a: ["Human experiences", "Financial profit", "Visual elements only", "Media influence"], c: 0, e: "เนื้อหาระบุว่า art reflects 'human experiences'." },
+        { q: "What captures a 'single moment'?", a: ["A movie scene", "A famous portrait", "A powerful script", "Commercial art"], c: 1, e: "เนื้อหาระบุว่า 'A famous portrait may capture a single moment'." },
+        { q: "How does media influence the public?", a: ["By creating art", "By spreading discussions", "By selling paintings", "By writing scripts"], c: 1, e: "เนื้อหาระบุว่า discussions spread through media and 'influence public opinion'." },
+        { q: "The word 'Controversial' likely means:", a: ["Everyone agrees", "Causing disagreement", "Very expensive", "Very old"], c: 1, e: "Controversial หมายถึงที่ถกเถียงกัน หรือทำให้เกิดความเห็นต่าง" },
+        { q: "What is a 'script' based on the context?", a: ["A painting technique", "Written text for a movie", "A type of color", "A movie theater"], c: 1, e: "Script คือบทละครหรือบทภาพยนตร์" },
+        { q: "Which word is a synonym for 'Engaging' in the text?", a: ["Boring", "Interesting/Attractive", "Difficult", "Violent"], c: 1, e: "Engaging หมายถึงที่น่าสนใจหรือดึงดูดใจ" },
+        { q: "What is the opposite of 'Praise'?", a: ["Admire", "Criticize", "Reflect", "Eager"], c: 1, e: "Praise (ชมเชย) ตรงข้ามกับ Criticize (วิจารณ์/ตำหนิ)" },
+        { q: "Which of these is NOT mentioned as a visual element?", a: ["Color", "Light", "Sound", "Shape"], c: 2, e: "ในบทความพูดถึง color, light, shape แต่ไม่ได้พูดถึง sound ในส่วนของ visual elements" },
+        { q: "The text suggests that reactions to art are:", a: ["Always positive", "Always negative", "Mixed (both positive and negative)", "Non-existent"], c: 2, e: "ระบุว่า 'Whether praised or criticized' แสดงว่ามีทั้งสองแบบ" },
+        { q: "A novelist turning observation into a story is an example of:", a: ["Abstract art", "Creative process/Storytelling", "Commercial profit", "Media influence"], c: 1, e: "เป็นกระบวนการสร้างสรรค์เรื่องราว (Storytelling)" },
+        { q: "What is the overall tone of the passage?", a: ["Angry", "Informative", "Funny", "Scary"], c: 1, e: "บทความเป็นการให้ข้อมูลเกี่ยวกับศิลปะและสื่อ (Informative)" }
+    ];
+
+    const container = document.getElementById('questionsContainer');
+
+    quizData.forEach((data, index) => {
+        let qHtml = `
+            <div class="question-block" id="qBlock${index}">
+                <p><strong>ข้อที่ ${index + 1}:</strong> ${data.q}</p>
+                <div class="options">
+                    ${data.a.map((opt, i) => `
+                        <label class="option">
+                            <input type="radio" name="q${index}" value="${i}"> ${opt}
+                        </label>
+                    `).join('')}
+                </div>
+                <div class="explanation" id="exp${index}">💡 เฉลย: ${data.a[data.c]} <br> ${data.e}</div>
+            </div>
+        `;
+        container.innerHTML += qHtml;
+    });
+
+    function calculateScore() {
+        const name = document.getElementById('userName').value;
+        const no = document.getElementById('userNo').value;
+
+        if(!name || !no) {
+            alert("กรุณากรอกชื่อและเลขที่ก่อนส่งครับ");
+            return;
+        }
+
+        let score = 0;
+        quizData.forEach((data, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const exp = document.getElementById(`exp${index}`);
+            const block = document.getElementById(`qBlock${index}`);
+            
+            exp.style.display = "block";
+            
+            if (selected && parseInt(selected.value) === data.c) {
+                score++;
+                block.style.backgroundColor = "#d4edda";
+            } else {
+                block.style.backgroundColor = "#f8d7da";
+            }
+        });
+
+        // สรุปผล
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('result').style.display = "block";
+        document.getElementById('scoreDisplay').innerHTML = `
+            <strong>คุณ:</strong> ${name} <strong>เลขที่:</strong> ${no}<br>
+            <strong>คะแนนที่ได้:</strong> ${score} / 25 คะแนน
+        `;
+        
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+</script>
+
+</body>
+</html>
